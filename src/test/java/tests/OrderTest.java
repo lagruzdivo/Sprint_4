@@ -1,25 +1,15 @@
 package tests;
-
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import pages.MainPage;
 import pages.OrderPage;
-
 import java.util.Arrays;
 import java.util.Collection;
-
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
-public class OrderTest {
-    private WebDriver driver;
-    private MainPage mainPage;
+public class OrderTest extends BaseTest {
     private OrderPage orderPage;
 
     private final String name;
@@ -54,34 +44,23 @@ public class OrderTest {
     }
 
     @Before
-    public void setup() {
-        WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
-        driver.get("https://qa-scooter.praktikum-services.ru/");
-        mainPage = new MainPage(driver);
+    public void initOrderPage() {
         orderPage = new OrderPage(driver);
     }
 
     @Test
     public void testOrderFlow() {
-        // Выбираем кнопку в зависимости от параметра
         if ("top".equals(buttonType)) {
             mainPage.clickOrderButtonTop();
         } else {
             mainPage.clickOrderButtonBottom();
         }
 
-        // Заполняем форму
         orderPage.fillFirstStep(name, lastName, address, metro, phone);
         orderPage.fillSecondStep(date, period, comment);
         orderPage.confirmOrder();
 
-        // Проверяем успешное создание заказа
-        assertTrue("Модальное окно успешного заказа должно отображаться", orderPage.isSuccessModalDisplayed());
-    }
-
-    @After
-    public void teardown() {
-        driver.quit();
+        assertTrue("Не удалось оформить заказ (обнаружен баг)",
+                orderPage.isSuccessModalDisplayed());
     }
 }
